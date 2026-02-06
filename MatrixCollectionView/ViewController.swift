@@ -28,9 +28,6 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        matrixCollectionView.dataSource = self
-        matrixCollectionView.delegate = self
     }
 }
 
@@ -40,16 +37,16 @@ extension ViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = matrixCollectionView.dequeueReusableCell(withReuseIdentifier: "DefaultCollectionViewCell", for: indexPath) as? DefaultCollectionViewCell
+        let cell = matrixCollectionView.dequeueReusableCell(withReuseIdentifier: "DefaultCollectionViewCell", for: indexPath)
         let row = indexPath.item / gridDimension
         let col = indexPath.item % gridDimension
         let itemBool = items?[row][col] ?? false
         if itemBool {
-            cell?.backgroundColor = .black
+            cell.backgroundColor = .black
         } else {
-            cell?.backgroundColor = .systemOrange
+            cell.backgroundColor = .systemOrange
         }
-        return cell ?? UICollectionViewCell()
+        return cell
     }
 }
 
@@ -66,9 +63,19 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let row = indexPath.item / gridDimension
         let col = indexPath.item % gridDimension
+        
+        switchCellsToBlack(startingCell: (row, col))
+        matrixCollectionView.reloadData()
+    }
+    
+    func switchCellsToBlack(startingCell: (Int,Int)) {
+        let row = startingCell.0
+        let col = startingCell.1
         let itemBool = items?[row][col] ?? false
         
         if !itemBool {
+            items?[row][col] = true
+            
             var cellIndicies: [(Int,Int)] = [(row,col)]
             
             if col < gridDimension - 1 {
@@ -85,10 +92,8 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
             }
             
             for cellIndex in cellIndicies {
-                items?[cellIndex.0][cellIndex.1] = true
+                switchCellsToBlack(startingCell: cellIndex)
             }
-            
-            matrixCollectionView.reloadData()
         }
     }
 }
